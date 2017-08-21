@@ -1,0 +1,17 @@
+---
+HOSTS:
+  'km302u2f5lgss1k.delivery.puppetlabs.net':
+    pe_dir: 
+    pe_ver: 
+    pe_upgrade_dir: 
+    pe_upgrade_ver: 
+    hypervisor: vmpooler
+    platform: el-7-x86_64
+    template: redhat-7-x86_64
+    roles:
+    - agent
+    - default
+CONFIG:
+  nfs_server: none
+  consoleport: 443
+  pooling_api: http://vmpooler.delivery.puppetlabs.net/

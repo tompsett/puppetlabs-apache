@@ -4,7 +4,8 @@ require_relative './version.rb'
 describe 'apache parameters' do
 
   # Currently this test only does something on FreeBSD.
-  describe 'default_confd_files => false' do
+  # Remove the first 4 tests - They are freebsd whcih isnt supported line 7 - 31
+  describe 'default_confd_files => false', :audit_delete => true do
     it 'doesnt do anything' do
       pp = "class { 'apache': default_confd_files => false }"
       apply_manifest(pp, :catch_failures => true)
@@ -16,7 +17,8 @@ describe 'apache parameters' do
       end
     end
   end
-  describe 'default_confd_files => true' do
+
+  describe 'default_confd_files => true', :audit_delete => true do
     it 'copies conf.d files' do
       pp = "class { 'apache': default_confd_files => true }"
       apply_manifest(pp, :catch_failures => true)
@@ -29,7 +31,8 @@ describe 'apache parameters' do
     end
   end
 
-  describe 'when set adds a listen statement' do
+  # Should be :unit test, not checking os, only checks file exists and contents 34-44, :high
+  describe 'when set adds a listen statement', :audit_risk => :high, :audit_layer => :unit do
     it 'applys cleanly' do
       pp = "class { 'apache': ip => '10.1.1.1', service_ensure => stopped }"
       apply_manifest(pp, :catch_failures => true)
@@ -41,7 +44,8 @@ describe 'apache parameters' do
     end
   end
 
-  describe 'service tests => true' do
+# :acceptance test & refactor, :high - Address pending section
+  describe 'service tests => true', :audit_risk => :high, :audit_layer => :acceptance, audit_refactor => true do
     it 'starts the service' do
       pp = <<-EOS
         class { 'apache':
@@ -63,7 +67,8 @@ describe 'apache parameters' do
     end
   end
 
-  describe 'service tests => false' do
+  # :acceptance test & refactor, :high - Address pending section
+  describe 'service tests => false', :audit_risk => :high, :audit_layer => :acceptance, :audit_refactor=> true do
     it 'stops the service' do
       pp = <<-EOS
         class { 'apache':
@@ -84,7 +89,8 @@ describe 'apache parameters' do
     end
   end
 
-  describe 'service manage => false' do
+  # :acceptance test & refactor, :high - Adddress pending section, we shoudl check the erorr that is returned  91 - 111
+  describe 'service manage => false', :audit_risk => :high, :audit_layer => :acceptance, :audit_refactor => true do
     it 'we dont manage the service, so it shouldnt start the service' do
       pp = <<-EOS
         class { 'apache':
@@ -106,7 +112,8 @@ describe 'apache parameters' do
     end
   end
 
-  describe 'purge parameters => false' do
+# :acceptance, :high, check that this purging needs to be limited to debian 114-160
+  describe 'purge parameters => false', :audit_risk => :high, :audit_layer => :acceptance, :audit_refactor => true do
     it 'applies cleanly' do
       pp = <<-EOS
         class { 'apache':
@@ -130,7 +137,7 @@ describe 'apache parameters' do
   end
 
   if fact('osfamily') != 'Debian'
-    describe 'purge parameters => true' do
+    describe 'purge parameters => true', :audit_risk => :high, :audit_layer => :acceptance, :audit_refactor => true do
       it 'applies cleanly' do
         pp = <<-EOS
           class { 'apache':
@@ -154,7 +161,8 @@ describe 'apache parameters' do
     end
   end
 
-  describe 'serveradmin' do
+  # :unit, :high
+  describe 'serveradmin', :audit_risk => :high, :audit_layer => :unit do
     it 'applies cleanly' do
       pp = "class { 'apache': serveradmin => 'test@example.com' }"
       apply_manifest(pp, :catch_failures => true)
@@ -166,7 +174,8 @@ describe 'apache parameters' do
     end
   end
 
-  describe 'sendfile' do
+# :unit, :medium - All of the checking the config file contents
+  describe 'sendfile', :audit_risk => :medium, :audit_layer => :unit do
     describe 'setup' do
       it 'applies cleanly' do
         pp = "class { 'apache': sendfile => 'On' }"
@@ -179,7 +188,7 @@ describe 'apache parameters' do
       it { is_expected.to contain 'EnableSendfile On' }
     end
 
-    describe 'setup' do
+    describe 'setup', :audit_risk => :medium, :audit_layer => :unit do
       it 'applies cleanly' do
         pp = "class { 'apache': sendfile => 'Off' }"
         apply_manifest(pp, :catch_failures => true)
@@ -192,7 +201,8 @@ describe 'apache parameters' do
     end
   end
 
-  describe 'error_documents' do
+
+  describe 'error_documents', :audit_risk => :medium, :audit_layer => :unit do
     describe 'setup' do
       it 'applies cleanly' do
         pp = "class { 'apache': error_documents => true }"
@@ -206,7 +216,7 @@ describe 'apache parameters' do
     end
   end
 
-  describe 'timeout' do
+  describe 'timeout', :audit_risk => :medium, :audit_layer => :unit do
     describe 'setup' do
       it 'applies cleanly' do
         pp = "class { 'apache': timeout => '1234' }"
@@ -220,7 +230,8 @@ describe 'apache parameters' do
     end
   end
 
-  describe 'httpd_dir' do
+ # Dont think this is in the right place - Its checking mime file contents
+  describe 'httpd_dir', :audit_refactor do
     describe 'setup' do
       it 'applies cleanly' do
         pp = <<-EOS
@@ -237,7 +248,10 @@ describe 'apache parameters' do
     end
   end
 
-  describe 'http_protocol_options' do
+
+  # Does the bug still exist? check on ubuntu or sles
+  # If bug dosnt exist it can be a :unit test, otherwise an :acceptance test, :medium
+  describe 'http_protocol_options', :audit_risk => :medium, :audit_layer => :unit?, :audit_refactor => true do
     # Actually >= 2.4.24, but the minor version is not provided
     # https://bugs.launchpad.net/ubuntu/+source/apache2/2.4.7-1ubuntu4.15
     # basically versions of the ubuntu or sles  apache package cause issue
@@ -256,7 +270,8 @@ describe 'apache parameters' do
     end
   end
 
-  describe 'server_root' do
+# :unit, :medium
+  describe 'server_root', :audit_risk => :medium, :audit_layer => :unit do
     describe 'setup' do
       it 'applies cleanly' do
         pp = "class { 'apache': server_root => '/tmp/root', service_ensure => stopped }"
@@ -270,7 +285,9 @@ describe 'apache parameters' do
     end
   end
 
-  describe 'confd_dir' do
+
+# This is :high, confdir is important, things cant start, :unit if I can - with the apache_version
+  describe 'confd_dir', :audit_risk => :high, :audit_layer => :unit do
     describe 'setup' do
       it 'applies cleanly' do
         pp = "class { 'apache': confd_dir => '/tmp/root', service_ensure => stopped, use_optional_includes => true }"
@@ -291,7 +308,8 @@ describe 'apache parameters' do
     end
   end
 
-  describe 'conf_template' do
+# Could be a :unit test, :high
+  describe 'conf_template', :audit_risk => :high, :audit_layer => :unit do
     describe 'setup' do
       it 'applies cleanly' do
         pp = "class { 'apache': conf_template => 'another/test.conf.erb', service_ensure => stopped }"
@@ -307,7 +325,8 @@ describe 'apache parameters' do
     end
   end
 
-  describe 'servername' do
+# :high, :unit
+  describe 'servername', :audit_risk => :high, :audit_layer => :unit do
     describe 'setup' do
       it 'applies cleanly' do
         pp = "class { 'apache': servername => 'test.server', service_ensure => stopped }"
@@ -321,7 +340,8 @@ describe 'apache parameters' do
     end
   end
 
-  describe 'user' do
+# Could be :acceptance due to OS dependency, creating user. :high
+  describe 'user', :audit_risk => :high, :audit_layer => :acceptance do
     describe 'setup' do
       it 'applies cleanly' do
         pp = <<-EOS
@@ -346,7 +366,8 @@ describe 'apache parameters' do
     end
   end
 
-  describe 'logformats' do
+# :unit, med
+  describe 'logformats', :audit_risk => :medium, :audit_layer => :unit do
     describe 'setup' do
       it 'applies cleanly' do
         pp = <<-EOS
@@ -368,8 +389,8 @@ describe 'apache parameters' do
     end
   end
 
-
-  describe 'keepalive' do
+# :high, :unit
+  describe 'keepalive', :audit_risk => :high, :audit_layer => :unit do
     describe 'setup' do
       it 'applies cleanly' do
         pp = "class { 'apache': keepalive => 'Off', keepalive_timeout => '30', max_keepalive_requests => '200' }"
@@ -385,7 +406,8 @@ describe 'apache parameters' do
     end
   end
 
-  describe 'limitrequestfieldsize' do
+# :unit, :low
+  describe 'limitrequestfieldsize', :audit_risk => :low, :audit_layer => :unit do
     describe 'setup' do
       it 'applies cleanly' do
         pp = "class { 'apache': limitreqfieldsize => '16830' }"
@@ -399,7 +421,8 @@ describe 'apache parameters' do
     end
   end
 
-  describe 'logging' do
+# :acceptance, does it need to be limited to OS, med
+  describe 'logging', :audit_risk => :medium, :audit_layer => :unit, :audit_refactor => true do
     describe 'setup' do
       it 'applies cleanly' do
         pp = <<-EOS
@@ -434,7 +457,8 @@ describe 'apache parameters' do
     end
   end
 
-  describe 'ports_file' do
+# - Move all ports test together (up the file) :unit, :medium
+  describe 'ports_file', :audit_risk => :medium, :audit_layer => :unit, :audit_refactor => true do
     it 'applys cleanly' do
       pp = <<-EOS
         file { '/apache_spec': ensure => directory, }
@@ -453,7 +477,8 @@ describe 'apache parameters' do
     end
   end
 
-  describe 'server_tokens' do
+# :unit, med
+  describe 'server_tokens', :audit_risk => :medium, :audit_layer => :unit do
     it 'applys cleanly' do
       pp = <<-EOS
         class { 'apache':
@@ -469,7 +494,8 @@ describe 'apache parameters' do
     end
   end
 
-  describe 'server_signature' do
+# :unit, :medium
+  describe 'server_signature', :audit_risk => :medium, :audit_layer => :unit do
     it 'applys cleanly' do
       pp = <<-EOS
         class { 'apache':
@@ -486,7 +512,8 @@ describe 'apache parameters' do
     end
   end
 
-  describe 'trace_enable' do
+# :unit, med
+  describe 'trace_enable', :audit_risk => :medium, :audit_layer => :unit do
     it 'applys cleanly' do
       pp = <<-EOS
         class { 'apache':
@@ -502,7 +529,7 @@ describe 'apache parameters' do
     end
   end
 
-  describe 'file_e_tag' do
+  describe 'file_e_tag', :audit_risk => :medium, :audit_layer => :unit do
     it 'applys cleanly' do
       pp = <<-EOS
         class { 'apache':
@@ -518,7 +545,8 @@ describe 'apache parameters' do
     end
   end
 
-  describe 'package_ensure' do
+# :high, :acceptance
+  describe 'package_ensure', :audit_risk => :high, :audit_layer => :acceptance do
     it 'applys cleanly' do
       pp = <<-EOS
         class { 'apache':
@@ -532,5 +560,4 @@ describe 'apache parameters' do
       it { is_expected.to be_installed }
     end
   end
-
 end
