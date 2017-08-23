@@ -45,7 +45,7 @@ describe 'apache parameters' do
   end
 
 # :acceptance test & refactor, :high - Address pending section
-  describe 'service tests => true', :audit_risk => :high, :audit_layer => :acceptance, audit_refactor => true do
+  describe 'service tests => true', :audit_risk => :high, :audit_layer => :acceptance, :audit_refactor => true do
     it 'starts the service' do
       pp = <<-EOS
         class { 'apache':
